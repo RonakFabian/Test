@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>E:\AsteroidsTest2019_v3\AsteroidsTest2019\x64\Debug\Asteroids.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>E:\AsteroidsTest2019_v3\AsteroidsTest2019\x64\Debug\PixelShader_FvfXyzDiffuse.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\AsteroidsTest2019_v3\AsteroidsTest2019\x64\Debug\PixelShader_SpriteFont.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\AsteroidsTest2019_v3\AsteroidsTest2019\x64\Debug\VertexShader_FvfXyzDiffuse.cso</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>E:\AsteroidsTest2019_v3\AsteroidsTest2019\x64\Debug\VertexShader_SpriteFont.cso</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>

@@ -30,3 +30,8 @@
 *.exe
 *.out
 *.app
+*.ipch
+AsteroidsTest2019/.vs/AsteroidsTest/v16/.suo
+*.db
+*.tlog
+*.pdb
