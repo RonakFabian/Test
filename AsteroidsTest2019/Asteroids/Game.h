@@ -37,8 +37,9 @@ private:
 	Game(const Game &);
 	void operator=(const Game &);
 
-	typedef std::list<Asteroid *> AsteroidList;
-	typedef std::list<Explosion *> ExplosionList;
+	typedef std::list<Asteroid*> AsteroidList;
+	typedef std::list<Explosion*> ExplosionList;
+	typedef std::list<Bullet*> BulletList;
 
 	void SpawnPlayer();
 	void DeletePlayer();
@@ -50,9 +51,11 @@ private:
 
 	void DeleteAllAsteroids();
 	void DeleteAllExplosions();
+	void DeleteAllBullets();
 
 	void SpawnBullet(XMVECTOR position, XMVECTOR direction);
-	void DeleteBullet();
+	void DeleteBullet(Bullet* currentBullet_);
+	
 
 	void SpawnAsteroids(int numAsteroids);
 	void SpawnAsteroidAt(XMVECTOR position, int size);
@@ -66,7 +69,9 @@ private:
 
 	Background *background_;
 	Ship *player_;
-	Bullet *bullet_;
+	Bullet* bullet_;
+	Bullet* burstBullets[3];
+	BulletList bulletPool_;
 	AsteroidList asteroids_;
 	ExplosionList explosions_;
 

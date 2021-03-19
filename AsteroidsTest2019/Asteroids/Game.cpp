@@ -31,7 +31,7 @@ Game::~Game()
 	delete camera_;
 	delete background_;
 	delete player_;
-	DeleteBullet();
+	DeleteAllBullets();
 	DeleteAllAsteroids();
 	DeleteAllExplosions();
 	delete collision_;
@@ -73,10 +73,16 @@ void Game::RenderEverything(Graphics *graphics)
 		(*asteroidIt)->Render(graphics);
 	}
 
-	if (bullet_)
+	for (BulletList::const_iterator bulletItr = bulletPool_.begin();
+		bulletItr != bulletPool_.end();
+		bulletItr++)
 	{
-		bullet_->Render(graphics);
+		if (*bulletItr)
+		{
+			(*bulletItr)->Render(graphics);
+		}
 	}
+
 
 	for (ExplosionList::const_iterator explosionIt = explosions_.begin(),
 		end = explosions_.end();
@@ -121,7 +127,11 @@ void Game::DoCollision(GameEntity *a, GameEntity *b)
 	if (bullet && asteroid)
 	{
 		AsteroidHit(asteroid);
-		DeleteBullet();
+
+		BulletList::const_iterator itr = std::find(bulletPool_.begin(), bulletPool_.end(), bullet);
+		DeleteBullet(*itr);
+
+	
 	}
 }
 
@@ -195,10 +205,22 @@ void Game::UpdateAsteroids(System *system)
 
 void Game::UpdateBullet(System *system)
 {
-	if (bullet_)
+	BulletList::iterator bulletItr;
+	for (bulletItr = bulletPool_.begin();
+		bulletItr != bulletPool_.end();
+		bulletItr++)
 	{
-		bullet_->Update(system);
-		WrapEntity(bullet_);
+		if (*bulletItr)
+		{
+			(*bulletItr)->Update(system);
+			WrapEntity(*bulletItr);
+
+			/*if ((float(clock() - (*bulletItr)->timeElapsed) / CLOCKS_PER_SEC) > bulletMaxLifeTime)
+			{
+				DeleteBullet(*bulletItr);
+				break;
+			}*/
+		}
 	}
 }
 
@@ -237,17 +259,29 @@ void Game::DeleteAllExplosions()
 	explosions_.clear();
 }
 
-void Game::SpawnBullet(XMVECTOR position, XMVECTOR direction)
+void Game::DeleteAllBullets()
 {
-	DeleteBullet();
-	bullet_ = new Bullet(position, direction);
-	bullet_->EnableCollisions(collision_, 3.0f);
+	for (BulletList::const_iterator bulletItr = bulletPool_.begin();
+		bulletItr != bulletPool_.end();
+		bulletItr++)
+	{
+		delete (*bulletItr);
+	}
+
+	bulletPool_.clear();
 }
 
-void Game::DeleteBullet()
+void Game::SpawnBullet(XMVECTOR position, XMVECTOR direction)
 {
-	delete bullet_;
-	bullet_ = 0;
+	Bullet* bullet = new Bullet(position, direction);
+	bullet->EnableCollisions(collision_, 3.0f);
+	bulletPool_.push_back(bullet);
+}
+
+void Game::DeleteBullet(Bullet* currentBullet_)
+{
+	bulletPool_.remove(currentBullet_);
+	delete (currentBullet_);
 }
 
 void Game::SpawnAsteroids(int numAsteroids)
