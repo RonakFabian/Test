@@ -14,8 +14,8 @@ public:
 	void SetControlInput(float acceleration,
 		float rotation);
 
-	void Update(System *system);
-	void Render(Graphics *graphics) const;
+	void Update(System* system);
+	void Render(Graphics* graphics) const;
 
 	XMVECTOR GetForwardVector() const;
 	XMVECTOR GetVelocity() const;
@@ -36,6 +36,8 @@ private:
 
 	float rateOfFire_;
 	clock_t lastBulletShotTime_;
+
+
 
 };
 

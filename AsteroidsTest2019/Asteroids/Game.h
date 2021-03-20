@@ -3,6 +3,7 @@
 
 #include <DirectXMath.h>
 #include <list>
+#include <time.h>
 
 
 using namespace DirectX;
@@ -35,9 +36,10 @@ public:
     void DoCollision(GameEntity* a, GameEntity* b);
 
     int GetCurrentScore() const;
-    int GetHighScore() const;
+    int GetLives() const;
+   
 
-    void ResetScore();
+   // void ResetScore();
 
 private:
     Game(const Game&);
@@ -60,7 +62,9 @@ private:
     void DeleteAllBullets();
 
     void SpawnBullet(XMVECTOR position, XMVECTOR direction);
+    void SpawnBullet(XMVECTOR position, XMVECTOR direction,float projectileSpeed);
     void DeleteBullet(Bullet* currentBullet_);
+
 
 
     void SpawnAsteroids(int numAsteroids);
@@ -71,6 +75,7 @@ private:
     void DeleteAsteroid(Asteroid* asteroid);
 
     void UpdateCollisions();
+    void CameraShake();
 
     OrthoCamera* camera_;
 
@@ -82,7 +87,11 @@ private:
     Collision* collision_;
 
     int currentScore_;
-    int highScore_;
+    int currentLives_;
+    int maxLives;
+    int camShakeTime = 200;
+    clock_t CamTimer;
+    bool canShake = false;
 
   
 };

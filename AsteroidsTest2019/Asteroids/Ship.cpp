@@ -6,107 +6,110 @@
 #include <algorithm>
 
 Ship::Ship() :
-    accelerationControl_(0.0f),
-    rotationControl_(0.0f),
-    velocity_(XMFLOAT3(0.0f, 0.0f, 0.0f)),
-    forward_(XMFLOAT3(0.0f, 1.0f, 0.0f)),
-    rotation_(0.0f) //**TODO: Candidate for crash
+	accelerationControl_(0.0f),
+	rotationControl_(0.0f),
+	velocity_(XMFLOAT3(0.0f, 0.0f, 0.0f)),
+	forward_(XMFLOAT3(0.0f, 1.0f, 0.0f)),
+	rotation_(0.0f) //**TODO: Candidate for crash
 {
-    rateOfFire_ = 0.5f;
+	rateOfFire_ = 0.5f;
+	
 }
 
 void Ship::SetControlInput(float acceleration,
-    float rotation)
+	float rotation)
 {
-    accelerationControl_ = acceleration;
-    rotationControl_ = rotation;
+	accelerationControl_ = acceleration;
+	rotationControl_ = rotation;
 }
 
 void Ship::Update(System* system)
 {
-    const float RATE_OF_ROTATION = 0.1f;
-    const float MAX_SPEED = 2.0f;
-    const float VELOCITY_TWEEN = 0.05f;
+	const float RATE_OF_ROTATION = 0.1f;
+	const float MAX_SPEED = 2.0f;
+	const float VELOCITY_TWEEN = 0.05f;
 
-    rotation_ = Maths::WrapModulo(rotation_ + rotationControl_ * RATE_OF_ROTATION,
-        Maths::TWO_PI);
+	rotation_ = Maths::WrapModulo(rotation_ + rotationControl_ * RATE_OF_ROTATION,
+		Maths::TWO_PI);
 
-    XMMATRIX rotationMatrix = XMMatrixRotationZ(rotation_);
-    XMVECTOR newForward = XMVector3TransformNormal(XMVectorSet(0.f, 1.0f, 0.0f, 0.0f), rotationMatrix);
-    newForward = XMVector3Normalize(newForward);
-    XMStoreFloat3(&forward_, newForward);
+	XMMATRIX rotationMatrix = XMMatrixRotationZ(rotation_);
+	XMVECTOR newForward = XMVector3TransformNormal(XMVectorSet(0.f, 1.0f, 0.0f, 0.0f), rotationMatrix);
+	newForward = XMVector3Normalize(newForward);
+	XMStoreFloat3(&forward_, newForward);
 
-    XMVECTOR idealVelocity = XMVectorScale(XMLoadFloat3(&forward_), accelerationControl_ * MAX_SPEED);
-    XMVECTOR newVelocity = XMVectorLerp(XMLoadFloat3(&velocity_), idealVelocity, VELOCITY_TWEEN);
-    XMStoreFloat3(&velocity_, newVelocity);
+	XMVECTOR idealVelocity = XMVectorScale(XMLoadFloat3(&forward_), accelerationControl_ * MAX_SPEED);
+	XMVECTOR newVelocity = XMVectorLerp(XMLoadFloat3(&velocity_), idealVelocity, VELOCITY_TWEEN);
+	XMStoreFloat3(&velocity_, newVelocity);
 
-    XMVECTOR position = GetPosition();
-    position = XMVectorAdd(position, XMLoadFloat3(&velocity_));
-    SetPosition(position);
+	XMVECTOR position = GetPosition();
+	position = XMVectorAdd(position, XMLoadFloat3(&velocity_));
+	SetPosition(position);
 }
 
 void Ship::Render(Graphics* graphics) const
 {
-    ImmediateModeVertex axis[8] =
-    {
-        {0.0f, -5.0f, 0.0f, 0xffffffff}, {0.0f, 10.0f, 0.0f, 0xffffffff},
-        {-5.0f, 0.0f, 0.0f, 0xffffffff}, {5.0f, 0.0f, 0.0f, 0xffffffff},
-        {0.0f, 10.0f, 0.0f, 0xffffffff}, {-5.0f, 5.0f, 0.0f, 0xffffffff},
-        {0.0f, 10.0f, 0.0f, 0xffffffff}, {5.0f, 5.0f, 0.0f, 0xffffffff},
-    };
+	ImmediateModeVertex axis[8] =
+	{
+		{0.0f, -5.0f, 0.0f, 0xffffffff}, {0.0f, 10.0f, 0.0f, 0xffffffff},
+		{-5.0f, 0.0f, 0.0f, 0xffffffff}, {5.0f, 0.0f, 0.0f, 0xffffffff},
+		{0.0f, 10.0f, 0.0f, 0xffffffff}, {-5.0f, 5.0f, 0.0f, 0xffffffff},
+		{0.0f, 10.0f, 0.0f, 0xffffffff}, {5.0f, 5.0f, 0.0f, 0xffffffff},
+	};
 
-    XMMATRIX rotationMatrix = XMMatrixRotationZ(rotation_);
+	XMMATRIX rotationMatrix = XMMatrixRotationZ(rotation_);
 
-    XMVECTOR position = GetPosition();
-    XMMATRIX translationMatrix = XMMatrixTranslation(
-        XMVectorGetX(position),
-        XMVectorGetY(position),
-        XMVectorGetZ(position));
+	XMVECTOR position = GetPosition();
+	XMMATRIX translationMatrix = XMMatrixTranslation(
+		XMVectorGetX(position),
+		XMVectorGetY(position),
+		XMVectorGetZ(position));
 
-    XMMATRIX shipTransform = rotationMatrix * translationMatrix;
+	XMMATRIX shipTransform = rotationMatrix * translationMatrix;
 
-    ImmediateMode* immediateGraphics = graphics->GetImmediateMode();
+	ImmediateMode* immediateGraphics = graphics->GetImmediateMode();
 
-    immediateGraphics->SetModelMatrix(shipTransform);
-    immediateGraphics->Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
-        &axis[0],
-        8);
-    immediateGraphics->SetModelMatrix(XMMatrixIdentity());
+	immediateGraphics->SetModelMatrix(shipTransform);
+	immediateGraphics->Draw(D3D11_PRIMITIVE_TOPOLOGY_LINELIST,
+		&axis[0],
+		8);
+	immediateGraphics->SetModelMatrix(XMMatrixIdentity());
 }
 
 XMVECTOR Ship::GetForwardVector() const
 {
-    return XMLoadFloat3(&forward_);
+	return XMLoadFloat3(&forward_);
 }
 
 XMVECTOR Ship::GetVelocity() const
 {
-    return XMLoadFloat3(&velocity_);
+	return XMLoadFloat3(&velocity_);
 }
 
 float Ship::GetRateOfFire() const
 {
-    return rateOfFire_;
+	return rateOfFire_;
 }
 
 clock_t Ship::GetLastBulletShotTime() const
 {
-    return lastBulletShotTime_;
+	return lastBulletShotTime_;
 }
 
 void Ship::Reset()
 {
-    accelerationControl_ = 0.0f;
-    rotationControl_ = 0.0f;
+	accelerationControl_ = 0.0f;
+	rotationControl_ = 0.0f;
 
-    velocity_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
-    forward_ = XMFLOAT3(0.0f, 1.0f, 0.0f);
-    rotation_ = 0.0f;
+	velocity_ = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	forward_ = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	rotation_ = 0.0f;
 
-    SetPosition(XMVectorZero());
+	SetPosition(XMVectorZero());
 }
 
 void Ship::ResetTime()
 {
-    lastBulletShotTime_ = clock();
+	lastBulletShotTime_ = clock();
 }
+
+

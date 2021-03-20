@@ -6,7 +6,9 @@
 class Explosion : public GameEntity
 {
 public:
+
 private:
+
 };
 
 #endif // EXPLOSION_H_INCLUDED

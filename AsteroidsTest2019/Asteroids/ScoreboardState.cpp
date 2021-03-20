@@ -10,9 +10,11 @@
 #include <sstream>
 
 
+
 ScoreboardState::ScoreboardState() :
 	delay_(0),
-	isHighScore(false)
+	isHighScore(false),
+	highScore_(0)
 {
 }
 
@@ -20,7 +22,7 @@ void ScoreboardState::OnActivate(System* system, StateArgumentMap& args)
 {
 	isHighScore = false;
 	delay_ = 120;
-	UpdateHighScore(system);
+	CheckHighScore(system);
 }
 
 void ScoreboardState::OnUpdate(System* system)
@@ -39,28 +41,23 @@ void ScoreboardState::OnRender(System* system)
 	FontEngine* fontEngine = graphics->GetFontEngine();
 
 	game->RenderBackgroundOnly(graphics);
+	int textWidth = fontEngine->CalculateTextWidth("New Highscore!:", FontEngine::FONT_TYPE_MEDIUM);
+
+	int textX = (800 - textWidth) / 2;
+	int textY = (600 - 48) / 2;
 
 	if (isHighScore)
 	{
 
-
-		int textWidth = fontEngine->CalculateTextWidth("New Highscore!:", FontEngine::FONT_TYPE_MEDIUM);
-		int textX = (800 - textWidth) / 2;
-		int textY = (600 - 48) / 2;
-
 		fontEngine->DrawText("New Highscore!: ", textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_MEDIUM);
-		fontEngine->DrawText(std::to_string(game->GetCurrentScore()), textX+100 ,textY+50, 0xff00ffff, FontEngine::FONT_TYPE_MEDIUM);
+		fontEngine->DrawText(std::to_string(game->GetCurrentScore()), textX + 100, textY + 50, 0xff00ffff, FontEngine::FONT_TYPE_MEDIUM);
 	}
 	else
 	{
-		int textWidth = fontEngine->CalculateTextWidth("Score:   ", FontEngine::FONT_TYPE_MEDIUM);
-		int textX = (800 - textWidth) / 2;
-		int textY = (600 - 48) / 2;
-
-		fontEngine->DrawText("Score: "+ std::to_string(game->GetCurrentScore()), textX-30, textY, 0xff00ffff, FontEngine::FONT_TYPE_LARGE);
-		fontEngine->DrawText("Highscore: "+std::to_string(highScore_), textX+20 , textY + 50, 0xffffffff, FontEngine::FONT_TYPE_SMALL);
-
-
+		textWidth = fontEngine->CalculateTextWidth("Score:  ", FontEngine::FONT_TYPE_MEDIUM);
+		fontEngine->DrawText("Score:  " + std::to_string(game->GetCurrentScore()), textX + 10, textY, 0xff00ffff, FontEngine::FONT_TYPE_LARGE);
+		textWidth = fontEngine->CalculateTextWidth("Highscore: ", FontEngine::FONT_TYPE_MEDIUM);
+		fontEngine->DrawText("Highscore: " + std::to_string(highScore_), textX + 50, textY + 50, 0xffffffff, FontEngine::FONT_TYPE_SMALL);
 
 	}
 
@@ -70,7 +67,8 @@ void ScoreboardState::OnDeactivate(System* system)
 {
 
 }
-void ScoreboardState::UpdateHighScore(System* system)
+
+void ScoreboardState::CheckHighScore(System* system)
 {
 	Game* game = system->GetGame();
 	char direc[100];
@@ -89,15 +87,15 @@ void ScoreboardState::UpdateHighScore(System* system)
 
 	fin.close();
 
-	if (game->GetCurrentScore() > highScore_)
+	if (system->GetGame()->GetCurrentScore() > highScore_)
 	{
 		highScore_ = game->GetCurrentScore();
 
 		std::ofstream fout;
 		fout.open(path + "\\HighScore.txt");
 
-		std::string newHighScore = std::to_string(game->GetCurrentScore());
-		strcpy(data, newHighScore.c_str());
+		std::string newHighScore =  std::to_string(game->GetCurrentScore());
+		strcpy_s(data, newHighScore.c_str());
 		fout << data << std::endl;
 
 		fout.close();

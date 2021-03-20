@@ -8,6 +8,7 @@ class Bullet : public GameEntity
 {
 public:
 	Bullet(XMVECTOR position,XMVECTOR direction);
+	Bullet(XMVECTOR position,XMVECTOR direction, float projectileSpeed);
 
 	void Update(System *system);
 	void Render(Graphics *graphics) const;

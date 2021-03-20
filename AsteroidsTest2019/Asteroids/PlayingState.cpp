@@ -1,4 +1,4 @@
-#include "PlayingState.h"
+﻿#include "PlayingState.h"
 #include "System.h"
 #include "Game.h"
 #include "FontEngine.h"
@@ -47,7 +47,9 @@ void PlayingState::OnRender(System* system)
 	FontEngine* fontEngine = graphics->GetFontEngine();
 
 
-	fontEngine->DrawText("Score: " + std::to_string(game->GetCurrentScore()), 680, 30, 0xffffffff, FontEngine::FONT_TYPE_SMALL);
+	fontEngine->DrawText("Score: " + std::to_string(game->GetCurrentScore()), 0, 580, 0xffffffff, FontEngine::FONT_TYPE_SMALL);
+	
+	fontEngine->DrawText("Lives: "+std::to_string(game->GetLives()), 740, 580, 0xffffffff, FontEngine::FONT_TYPE_SMALL);
 
 }
 

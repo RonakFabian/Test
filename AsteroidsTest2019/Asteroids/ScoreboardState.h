@@ -16,7 +16,7 @@ private:
 	int delay_;
 	int highScore_;
 	bool isHighScore;
-	void UpdateHighScore(System* system);
+	void CheckHighScore(System* system);
 	
 };
 

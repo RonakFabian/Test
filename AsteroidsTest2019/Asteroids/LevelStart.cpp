@@ -14,7 +14,7 @@ void LevelStart::OnActivate(System* system, StateArgumentMap& args)
 {
 	level_ = args["Level"].asInt;
 	delay_ = 120;
-	system->GetGame()->ResetScore();
+
 
 }
 
