@@ -18,7 +18,7 @@ void GameOver::OnUpdate(System *system)
 {
 	if (--delay_ == 0)
 	{
-		system->SetNextState("MainMenu");
+		system->SetNextState("ScoreboardState");
 	}
 }
 
@@ -29,7 +29,7 @@ void GameOver::OnRender(System *system)
 
 	system->GetGame()->RenderBackgroundOnly(graphics);
 
-	const char *gameOverText = "Game Over";
+	const char *gameOverText = "Game Over!";
 	int textWidth = fontEngine->CalculateTextWidth(gameOverText, FontEngine::FONT_TYPE_LARGE);
 	int textX = (800 - textWidth) / 2;
 	int textY = (600 - 48) / 2;

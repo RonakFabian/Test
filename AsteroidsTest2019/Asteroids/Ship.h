@@ -2,6 +2,7 @@
 #define SHIP_H_INCLUDED
 
 #include "GameEntity.h"
+#include "time.h"
 
 class Graphics;
 
@@ -18,8 +19,11 @@ public:
 
 	XMVECTOR GetForwardVector() const;
 	XMVECTOR GetVelocity() const;
+	float GetRateOfFire() const;
+	clock_t GetLastBulletShotTime() const;
 
 	void Reset();
+	void ResetTime();
 
 private:
 
@@ -29,6 +33,9 @@ private:
 	XMFLOAT3 velocity_;
 	XMFLOAT3 forward_;
 	float rotation_;
+
+	float rateOfFire_;
+	clock_t lastBulletShotTime_;
 
 };
 

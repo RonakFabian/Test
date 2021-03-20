@@ -17,8 +17,9 @@ Game::Game() :
     background_(0),
     player_(0),
     collision_(0),
-    lastBulletShotTime_(clock()),
-    rateOfFire_(0.5f)
+    currentScore_(0),
+    highScore_(0)
+
 
 {
     camera_ = new OrthoCamera();
@@ -127,9 +128,25 @@ void Game::DoCollision(GameEntity* a, GameEntity* b)
 
         BulletList::const_iterator itr = std::find(bulletPool_.begin(), bulletPool_.end(), bullet);
         DeleteBullet(*itr);
+        currentScore_++;
 
 
     }
+}
+
+int Game::GetCurrentScore() const
+{
+    return currentScore_;
+}
+
+int Game::GetHighScore() const
+{
+    return highScore_;
+}
+
+void Game::ResetScore()
+{
+    currentScore_ = 0;
 }
 
 void Game::operator=(const Game&)
@@ -185,12 +202,22 @@ void Game::UpdatePlayer(System* system)
         XMVECTOR playerForward = player_->GetForwardVector();
         XMVECTOR bulletPosition = player_->GetPosition() + playerForward * 10.0f;
 
-        if ((float(clock() - lastBulletShotTime_) / CLOCKS_PER_SEC) > rateOfFire_)
+        if ((float(clock() - player_->GetLastBulletShotTime()) / CLOCKS_PER_SEC) > player_->GetRateOfFire())
         {
 
             SpawnBullet(bulletPosition, playerForward);
-            lastBulletShotTime_ = clock();
+            player_->ResetTime();
+
         }
+    }
+
+    if (keyboard->IsKeyPressed(VK_SHIFT))
+    {
+        DeleteAllAsteroids();
+    }
+    if (keyboard->IsKeyPressed(VK_TAB))
+    {
+        DeletePlayer();
     }
 }
 

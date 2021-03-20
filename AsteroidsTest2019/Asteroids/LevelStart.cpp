@@ -10,13 +10,15 @@ LevelStart::LevelStart() :
 {
 }
 
-void LevelStart::OnActivate(System *system, StateArgumentMap &args)
+void LevelStart::OnActivate(System* system, StateArgumentMap& args)
 {
 	level_ = args["Level"].asInt;
 	delay_ = 120;
+	system->GetGame()->ResetScore();
+
 }
 
-void LevelStart::OnUpdate(System *system)
+void LevelStart::OnUpdate(System* system)
 {
 	if (--delay_ == 0)
 	{
@@ -26,10 +28,10 @@ void LevelStart::OnUpdate(System *system)
 	}
 }
 
-void LevelStart::OnRender(System *system)
+void LevelStart::OnRender(System* system)
 {
-	Graphics *graphics = system->GetGraphics();
-	FontEngine *fontEngine = graphics->GetFontEngine();
+	Graphics* graphics = system->GetGraphics();
+	FontEngine* fontEngine = graphics->GetFontEngine();
 
 	system->GetGame()->RenderBackgroundOnly(graphics);
 
@@ -41,6 +43,7 @@ void LevelStart::OnRender(System *system)
 	fontEngine->DrawText(levelStartText, textX, textY, 0xff00ffff, FontEngine::FONT_TYPE_LARGE);
 }
 
-void LevelStart::OnDeactivate(System *system)
+void LevelStart::OnDeactivate(System* system)
 {
+
 }

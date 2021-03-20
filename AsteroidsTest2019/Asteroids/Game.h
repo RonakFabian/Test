@@ -3,7 +3,7 @@
 
 #include <DirectXMath.h>
 #include <list>
-#include <time.h>
+
 
 using namespace DirectX;
 
@@ -33,6 +33,11 @@ public:
     bool IsGameOver() const;
 
     void DoCollision(GameEntity* a, GameEntity* b);
+
+    int GetCurrentScore() const;
+    int GetHighScore() const;
+
+    void ResetScore();
 
 private:
     Game(const Game&);
@@ -76,8 +81,10 @@ private:
     ExplosionList explosions_;
     Collision* collision_;
 
-    float rateOfFire_;
-    clock_t lastBulletShotTime_ ;
+    int currentScore_;
+    int highScore_;
+
+  
 };
 
 #endif // GAME_H_INCLUDED
