@@ -3,47 +3,56 @@
 #include "ImmediateMode.h"
 #include "ImmediateModeVertex.h"
 
-Bullet::Bullet(XMVECTOR position,
-	XMVECTOR direction)
+Bullet::Bullet(XMVECTOR position, XMVECTOR direction) : currentLifeTime(clock()), maxLifeTime(2.5f)
 {
-	const float BULLET_SPEED = 4.0f;
+    const float BULLET_SPEED = 4.0f;
 
-	SetPosition(position);
-	XMVECTOR normalisedDirection = XMVector3Normalize(direction);
-	XMStoreFloat3(&velocity_, normalisedDirection * BULLET_SPEED);
+    SetPosition(position);
+    XMVECTOR normalisedDirection = XMVector3Normalize(direction);
+    XMStoreFloat3(&velocity_, normalisedDirection * BULLET_SPEED);
 }
 
-void Bullet::Update(System *system)
+void Bullet::Update(System* system)
 {
-	XMVECTOR position = GetPosition();
-	position = XMVectorAdd(position, XMLoadFloat3(&velocity_));
-	SetPosition(position);
+    XMVECTOR position = GetPosition();
+    position = XMVectorAdd(position, XMLoadFloat3(&velocity_));
+    SetPosition(position);
 }
 
-void Bullet::Render(Graphics *graphics) const
+void Bullet::Render(Graphics* graphics) const
 {
-	const float RADIUS = 3.0f;
+    const float RADIUS = 3.0f;
 
-	ImmediateModeVertex square[5] =
-	{
-		{-RADIUS, -RADIUS, 0.0f, 0xffffffff},
-		{-RADIUS,  RADIUS, 0.0f, 0xffffffff},
-		{ RADIUS,  RADIUS, 0.0f, 0xffffffff},
-		{ RADIUS, -RADIUS, 0.0f, 0xffffffff},
-		{-RADIUS, -RADIUS, 0.0f, 0xffffffff},
-	};
+    ImmediateModeVertex square[5] =
+    {
+        {-RADIUS, -RADIUS, 0.0f, 0xffffffff},
+        {-RADIUS,  RADIUS, 0.0f, 0xffffffff},
+        { RADIUS,  RADIUS, 0.0f, 0xffffffff},
+        { RADIUS, -RADIUS, 0.0f, 0xffffffff},
+        {-RADIUS, -RADIUS, 0.0f, 0xffffffff},
+    };
 
-	XMVECTOR position = GetPosition();
-	XMMATRIX translationMatrix = XMMatrixTranslation(
-		XMVectorGetX(position),
-		XMVectorGetY(position),
-		XMVectorGetZ(position));
+    XMVECTOR position = GetPosition();
+    XMMATRIX translationMatrix = XMMatrixTranslation(
+        XMVectorGetX(position),
+        XMVectorGetY(position),
+        XMVectorGetZ(position));
 
-	ImmediateMode *immediateGraphics = graphics->GetImmediateMode();
+    ImmediateMode* immediateGraphics = graphics->GetImmediateMode();
 
-	immediateGraphics->SetModelMatrix(translationMatrix);
-	immediateGraphics->Draw(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP,
-		&square[0],
-		5);
-	immediateGraphics->SetModelMatrix(XMMatrixIdentity());
+    immediateGraphics->SetModelMatrix(translationMatrix);
+    immediateGraphics->Draw(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP,
+        &square[0],
+        5);
+    immediateGraphics->SetModelMatrix(XMMatrixIdentity());
+}
+
+clock_t Bullet::GetTimeElapsed() const
+{
+    return currentLifeTime;
+}
+
+float Bullet::GetMaxLifeTime()const
+{
+    return maxLifeTime;
 }

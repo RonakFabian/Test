@@ -3,6 +3,7 @@
 
 #include <DirectXMath.h>
 #include <list>
+#include <time.h>
 
 using namespace DirectX;
 
@@ -20,62 +21,63 @@ class GameEntity;
 class Game
 {
 public:
-	Game();
-	~Game();
+    Game();
+    ~Game();
 
-	void Update(System *system);
-	void RenderBackgroundOnly(Graphics *graphics);
-	void RenderEverything(Graphics *graphics);
+    void Update(System* system);
+    void RenderBackgroundOnly(Graphics* graphics);
+    void RenderEverything(Graphics* graphics);
 
-	void InitialiseLevel(int numAsteroids);
-	bool IsLevelComplete() const;
-	bool IsGameOver() const;
+    void InitialiseLevel(int numAsteroids);
+    bool IsLevelComplete() const;
+    bool IsGameOver() const;
 
-	void DoCollision(GameEntity *a, GameEntity *b);
+    void DoCollision(GameEntity* a, GameEntity* b);
 
 private:
-	Game(const Game &);
-	void operator=(const Game &);
+    Game(const Game&);
+    void operator=(const Game&);
 
-	typedef std::list<Asteroid*> AsteroidList;
-	typedef std::list<Explosion*> ExplosionList;
-	typedef std::list<Bullet*> BulletList;
+    typedef std::list<Asteroid*> AsteroidList;
+    typedef std::list<Explosion*> ExplosionList;
+    typedef std::list<Bullet*> BulletList;
 
-	void SpawnPlayer();
-	void DeletePlayer();
+    void SpawnPlayer();
+    void DeletePlayer();
 
-	void UpdatePlayer(System *system);
-	void UpdateAsteroids(System *system);
-	void UpdateBullet(System *system);
-	void WrapEntity(GameEntity *entity) const;
+    void UpdatePlayer(System* system);
+    void UpdateAsteroids(System* system);
+    void UpdateBullet(System* system);
+    void WrapEntity(GameEntity* entity) const;
 
-	void DeleteAllAsteroids();
-	void DeleteAllExplosions();
-	void DeleteAllBullets();
+    void DeleteAllAsteroids();
+    void DeleteAllExplosions();
+    void DeleteAllBullets();
 
-	void SpawnBullet(XMVECTOR position, XMVECTOR direction);
-	void DeleteBullet(Bullet* currentBullet_);
-	
+    void SpawnBullet(XMVECTOR position, XMVECTOR direction);
+    void DeleteBullet(Bullet* currentBullet_);
 
-	void SpawnAsteroids(int numAsteroids);
-	void SpawnAsteroidAt(XMVECTOR position, int size);
-	bool IsAsteroid(GameEntity *entity) const;
-	void AsteroidHit(Asteroid *asteroid);
-	void DeleteAsteroid(Asteroid *asteroid);
 
-	void UpdateCollisions();
+    void SpawnAsteroids(int numAsteroids);
+    void SpawnAsteroidAt(XMVECTOR position, int size);
+    bool IsAsteroid(GameEntity* entity) const;
+    bool IsBullet(GameEntity* entity) const;
+    void AsteroidHit(Asteroid* asteroid);
+    void DeleteAsteroid(Asteroid* asteroid);
 
-	OrthoCamera *camera_;
+    void UpdateCollisions();
 
-	Background *background_;
-	Ship *player_;
-	Bullet* bullet_;
-	Bullet* burstBullets[3];
-	BulletList bulletPool_;
-	AsteroidList asteroids_;
-	ExplosionList explosions_;
+    OrthoCamera* camera_;
 
-	Collision *collision_;
+    Background* background_;
+    Ship* player_;
+    BulletList bulletPool_;
+    AsteroidList asteroids_;
+    ExplosionList explosions_;
+    Collision* collision_;
+
+    float rateOfFire_;
+    clock_t lastBulletShotTime_ ;
 };
 
 #endif // GAME_H_INCLUDED

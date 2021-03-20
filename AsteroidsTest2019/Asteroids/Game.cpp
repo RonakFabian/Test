@@ -13,126 +13,123 @@
 #include <algorithm>
 
 Game::Game() :
-	camera_(0),
-	background_(0),
-	player_(0),
-	collision_(0),
-	bullet_(0)
+    camera_(0),
+    background_(0),
+    player_(0),
+    collision_(0),
+    lastBulletShotTime_(clock()),
+    rateOfFire_(0.5f)
+
 {
-	camera_ = new OrthoCamera();
-	camera_->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
-	camera_->SetFrustum(800.0f, 600.0f, -100.0f, 100.0f);
-	background_ = new Background(800.0f, 600.0f);
-	collision_ = new Collision();
+    camera_ = new OrthoCamera();
+    camera_->SetPosition(XMFLOAT3(0.0f, 0.0f, 0.0f));
+    camera_->SetFrustum(800.0f, 600.0f, -100.0f, 100.0f);
+    background_ = new Background(800.0f, 600.0f);
+    collision_ = new Collision();
 }
 
 Game::~Game()
 {
-	delete camera_;
-	delete background_;
-	delete player_;
-	DeleteAllBullets();
-	DeleteAllAsteroids();
-	DeleteAllExplosions();
-	delete collision_;
+    delete camera_;
+    delete background_;
+    delete player_;
+    DeleteAllBullets();
+    DeleteAllAsteroids();
+    DeleteAllExplosions();
+    delete collision_;
 }
 
-void Game::Update(System *system)
+void Game::Update(System* system)
 {
-	if (system)
-	{
-		UpdatePlayer(system);
-		UpdateAsteroids(system);
-		UpdateBullet(system);
-		UpdateCollisions();
-	}
+
+    UpdatePlayer(system);
+    UpdateAsteroids(system);
+    UpdateBullet(system);
+    UpdateCollisions();
+
 }
 
-void Game::RenderBackgroundOnly(Graphics *graphics)
+void Game::RenderBackgroundOnly(Graphics* graphics)
 {
-	camera_->SetAsView(graphics);
-	background_->Render(graphics);
+    camera_->SetAsView(graphics);
+    background_->Render(graphics);
 }
 
-void Game::RenderEverything(Graphics *graphics)
+void Game::RenderEverything(Graphics* graphics)
 {
-	camera_->SetAsView(graphics);
+    camera_->SetAsView(graphics);
 
-	background_->Render(graphics);
+    background_->Render(graphics);
 
-	if (player_)
-	{
-		player_->Render(graphics);
-	}
+    if (player_)
+    {
+        player_->Render(graphics);
+    }
 
-	for (AsteroidList::const_iterator asteroidIt = asteroids_.begin(),
-		end = asteroids_.end();
-		asteroidIt != end;
-		++asteroidIt)
-	{
-		(*asteroidIt)->Render(graphics);
-	}
+    for (AsteroidList::const_iterator asteroidIt = asteroids_.begin(), end = asteroids_.end(); asteroidIt != end; ++asteroidIt)
+    {
+        (*asteroidIt)->Render(graphics);
+    }
 
-	for (BulletList::const_iterator bulletItr = bulletPool_.begin();
-		bulletItr != bulletPool_.end();
-		bulletItr++)
-	{
-		if (*bulletItr)
-		{
-			(*bulletItr)->Render(graphics);
-		}
-	}
+    for (BulletList::const_iterator bulletItr = bulletPool_.begin(); bulletItr != bulletPool_.end(); bulletItr++)
+    {
+        if (*bulletItr)
+        {
+            (*bulletItr)->Render(graphics);
+        }
+    }
 
 
-	for (ExplosionList::const_iterator explosionIt = explosions_.begin(),
-		end = explosions_.end();
-		explosionIt != end;
-		++explosionIt)
-	{
-		(*explosionIt)->Render(graphics);
-	}
+    for (ExplosionList::const_iterator explosionIt = explosions_.begin(),
+        end = explosions_.end();
+        explosionIt != end;
+        ++explosionIt)
+    {
+        (*explosionIt)->Render(graphics);
+    }
 }
 
 void Game::InitialiseLevel(int numAsteroids)
 {
-	DeleteAllAsteroids();
-	DeleteAllExplosions();
+    DeleteAllAsteroids();
+    DeleteAllExplosions();
+    DeleteAllBullets();
 
-	SpawnPlayer();
-	SpawnAsteroids(numAsteroids);
+    SpawnPlayer();
+    SpawnAsteroids(numAsteroids);
 }
 
 bool Game::IsLevelComplete() const
 {
-	return (asteroids_.empty() && explosions_.empty());
+    return (asteroids_.empty() && explosions_.empty());
 }
 
 bool Game::IsGameOver() const
 {
-	return (player_ == 0 && explosions_.empty());
+    return (player_ == 0 && explosions_.empty());
 }
 
-void Game::DoCollision(GameEntity *a, GameEntity *b)
+void Game::DoCollision(GameEntity* a, GameEntity* b)
 {
-	Ship *player = static_cast<Ship *>(a == player_ ? a : (b == player_ ? b : 0));
-	Bullet *bullet = static_cast<Bullet *>(a == bullet_ ? a : (b == bullet_ ? b : 0));
-	Asteroid *asteroid = static_cast<Asteroid *>(IsAsteroid(a) ? a : (IsAsteroid(b) ? b : 0));
+    Ship* player = static_cast<Ship*>(a == player_ ? a : (b == player_ ? b : 0));
+    Bullet* bullet = static_cast<Bullet*>(IsBullet(a) ? a : (IsBullet(b) ? b : 0));
+    Asteroid* asteroid = static_cast<Asteroid*>(IsAsteroid(a) ? a : (IsAsteroid(b) ? b : 0));
 
-	if (player && asteroid)
-	{
-		AsteroidHit(asteroid);
-		DeletePlayer();
-	}
+    if (player && asteroid)
+    {
+        AsteroidHit(asteroid);
+        DeletePlayer();
+    }
 
-	if (bullet && asteroid)
-	{
-		AsteroidHit(asteroid);
+    if (bullet && asteroid)
+    {
+        AsteroidHit(asteroid);
 
-		BulletList::const_iterator itr = std::find(bulletPool_.begin(), bulletPool_.end(), bullet);
-		DeleteBullet(*itr);
+        BulletList::const_iterator itr = std::find(bulletPool_.begin(), bulletPool_.end(), bullet);
+        DeleteBullet(*itr);
 
-	
-	}
+
+    }
 }
 
 void Game::operator=(const Game&)
@@ -141,202 +138,214 @@ void Game::operator=(const Game&)
 
 void Game::SpawnPlayer()
 {
-	DeletePlayer();
-	player_ = new Ship();
-	player_->EnableCollisions(collision_, 10.0f);
+    DeletePlayer();
+    player_ = new Ship();
+    player_->EnableCollisions(collision_, 10.0f);
 }
 
 void Game::DeletePlayer()
 {
-	delete player_;
-	player_ = 0;
+    delete player_;
+    player_ = 0;
 }
 
-void Game::UpdatePlayer(System *system)
+void Game::UpdatePlayer(System* system)
 {
-	if (player_ == 0)
-		return;
+    if (player_ == 0)
+        return;
 
-	Keyboard *keyboard = system->GetKeyboard();
+    Keyboard* keyboard = system->GetKeyboard();
 
-	float acceleration = 0.0f;
-	if (keyboard->IsKeyHeld(VK_UP) || keyboard->IsKeyHeld('W'))
-	{
-		acceleration = 1.0f;
-	}
-	else if (keyboard->IsKeyHeld(VK_DOWN) || keyboard->IsKeyHeld('S'))
-	{
-		acceleration = -1.0f;
-	}
+    float acceleration = 0.0f;
+    if (keyboard->IsKeyHeld(VK_UP) || keyboard->IsKeyHeld('W'))
+    {
+        acceleration = 1.0f;
+    }
+    else if (keyboard->IsKeyHeld(VK_DOWN) || keyboard->IsKeyHeld('S'))
+    {
+        acceleration = -1.0f;
+    }
 
-	float rotation = 0.0f;
-	if (keyboard->IsKeyHeld(VK_RIGHT) || keyboard->IsKeyHeld('D'))
-	{
-		rotation = -1.0f;
-	}
-	else if (keyboard->IsKeyHeld(VK_LEFT) || keyboard->IsKeyHeld('A'))
-	{
-		rotation = 1.0f;
-	}
+    float rotation = 0.0f;
+    if (keyboard->IsKeyHeld(VK_RIGHT) || keyboard->IsKeyHeld('D'))
+    {
+        rotation = -1.0f;
+    }
+    else if (keyboard->IsKeyHeld(VK_LEFT) || keyboard->IsKeyHeld('A'))
+    {
+        rotation = 1.0f;
+    }
 
-	player_->SetControlInput(acceleration, rotation);
-	player_->Update(system);
-	WrapEntity(player_);
+    player_->SetControlInput(acceleration, rotation);
+    player_->Update(system);
+    WrapEntity(player_);
 
-	if (keyboard->IsKeyPressed(VK_SPACE))
-	{
-		XMVECTOR playerForward = player_->GetForwardVector();
-		XMVECTOR bulletPosition = player_->GetPosition() + playerForward * 10.0f;
-		SpawnBullet(bulletPosition, playerForward);
-	}
+    if (keyboard->IsKeyPressed(VK_SPACE))
+    {
+        XMVECTOR playerForward = player_->GetForwardVector();
+        XMVECTOR bulletPosition = player_->GetPosition() + playerForward * 10.0f;
+
+        if ((float(clock() - lastBulletShotTime_) / CLOCKS_PER_SEC) > rateOfFire_)
+        {
+
+            SpawnBullet(bulletPosition, playerForward);
+            lastBulletShotTime_ = clock();
+        }
+    }
 }
 
-void Game::UpdateAsteroids(System *system)
+void Game::UpdateAsteroids(System* system)
 {
-	for (AsteroidList::const_iterator asteroidIt = asteroids_.begin(),
-		end = asteroids_.end();
-		asteroidIt != end;
-	++asteroidIt)
-	{
-		(*asteroidIt)->Update(system);
-		WrapEntity(*asteroidIt);
-	}
+    for (AsteroidList::const_iterator asteroidIt = asteroids_.begin(),
+        end = asteroids_.end();
+        asteroidIt != end;
+        ++asteroidIt)
+    {
+        (*asteroidIt)->Update(system);
+        WrapEntity(*asteroidIt);
+    }
 }
 
-void Game::UpdateBullet(System *system)
+void Game::UpdateBullet(System* system)
 {
-	BulletList::iterator bulletItr;
-	for (bulletItr = bulletPool_.begin();
-		bulletItr != bulletPool_.end();
-		bulletItr++)
-	{
-		if (*bulletItr)
-		{
-			(*bulletItr)->Update(system);
-			WrapEntity(*bulletItr);
+    BulletList::iterator bulletItr;
+    for (bulletItr = bulletPool_.begin();
+        bulletItr != bulletPool_.end();
+        bulletItr++)
+    {
+        if (*bulletItr)
+        {
+            (*bulletItr)->Update(system);
+            WrapEntity(*bulletItr);
 
-			/*if ((float(clock() - (*bulletItr)->timeElapsed) / CLOCKS_PER_SEC) > bulletMaxLifeTime)
-			{
-				DeleteBullet(*bulletItr);
-				break;
-			}*/
-		}
-	}
+            if (((static_cast<float>(clock()) - (*bulletItr)->GetTimeElapsed()) / CLOCKS_PER_SEC) > (*bulletItr)->GetMaxLifeTime())
+            {
+                DeleteBullet(*bulletItr);
+                return;
+            }
+        }
+    }
 }
 
-void Game::WrapEntity(GameEntity *entity) const
+void Game::WrapEntity(GameEntity* entity) const
 {
-	XMFLOAT3 entityPosition;
-	XMStoreFloat3(&entityPosition, entity->GetPosition());
-	entityPosition.x = Maths::WrapModulo(entityPosition.x, -400.0f, 400.0f);
-	entityPosition.y = Maths::WrapModulo(entityPosition.y, -300.0f, 300.0f);
-	entity->SetPosition(XMLoadFloat3(&entityPosition));
+    XMFLOAT3 entityPosition;
+    XMStoreFloat3(&entityPosition, entity->GetPosition());
+    entityPosition.x = Maths::WrapModulo(entityPosition.x, -400.0f, 400.0f);
+    entityPosition.y = Maths::WrapModulo(entityPosition.y, -300.0f, 300.0f);
+    entity->SetPosition(XMLoadFloat3(&entityPosition));
 }
 
 void Game::DeleteAllAsteroids()
 {
-	for (AsteroidList::const_iterator asteroidIt = asteroids_.begin(),
-		end = asteroids_.end();
-		asteroidIt != end;
-		++asteroidIt)
-	{
-		delete (*asteroidIt);
-	}
+    for (AsteroidList::const_iterator asteroidIt = asteroids_.begin(),
+        end = asteroids_.end();
+        asteroidIt != end;
+        ++asteroidIt)
+    {
+        delete (*asteroidIt);
+    }
 
-	asteroids_.clear();
+    asteroids_.clear();
 }
 
 void Game::DeleteAllExplosions()
 {
-	for (ExplosionList::const_iterator explosionIt = explosions_.begin(),
-		end = explosions_.end();
-		explosionIt != end;
-	++explosionIt)
-	{
-		delete (*explosionIt);
-	}
+    for (ExplosionList::const_iterator explosionIt = explosions_.begin(),
+        end = explosions_.end();
+        explosionIt != end;
+        ++explosionIt)
+    {
+        delete (*explosionIt);
+    }
 
-	explosions_.clear();
+    explosions_.clear();
 }
 
 void Game::DeleteAllBullets()
 {
-	for (BulletList::const_iterator bulletItr = bulletPool_.begin();
-		bulletItr != bulletPool_.end();
-		bulletItr++)
-	{
-		delete (*bulletItr);
-	}
+    for (BulletList::const_iterator bulletItr = bulletPool_.begin();
+        bulletItr != bulletPool_.end();
+        bulletItr++)
+    {
+        delete (*bulletItr);
+    }
 
-	bulletPool_.clear();
+    bulletPool_.clear();
 }
 
 void Game::SpawnBullet(XMVECTOR position, XMVECTOR direction)
 {
-	Bullet* bullet = new Bullet(position, direction);
-	bullet->EnableCollisions(collision_, 3.0f);
-	bulletPool_.push_back(bullet);
+    Bullet* bullet = new Bullet(position, direction);
+    bullet->EnableCollisions(collision_, 3.0f);
+    bulletPool_.push_back(bullet);
 }
 
 void Game::DeleteBullet(Bullet* currentBullet_)
 {
-	bulletPool_.remove(currentBullet_);
-	delete (currentBullet_);
+    bulletPool_.remove(currentBullet_);
+    delete (currentBullet_);
 }
 
 void Game::SpawnAsteroids(int numAsteroids)
 {
-	float halfWidth = 800.0f * 0.5f;
-	float halfHeight = 600.0f * 0.5f;
-	for (int i = 0; i < numAsteroids; i++)
-	{
-		float x = Random::GetFloat(-halfWidth, halfWidth);
-		float y = Random::GetFloat(-halfHeight, halfHeight);
-		XMVECTOR position = XMVectorSet(x, y, 0.0f, 0.0f);
-		SpawnAsteroidAt(position, 3);
-	}
+    float halfWidth = 800.0f * 0.5f;
+    float halfHeight = 600.0f * 0.5f;
+    for (int i = 0; i < numAsteroids; i++)
+    {
+        float x = Random::GetFloat(-halfWidth, halfWidth);
+        float y = Random::GetFloat(-halfHeight, halfHeight);
+        XMVECTOR position = XMVectorSet(x, y, 0.0f, 0.0f);
+        SpawnAsteroidAt(position, 3);
+    }
 }
 
 void Game::SpawnAsteroidAt(XMVECTOR position, int size)
 {
-	const float MAX_ASTEROID_SPEED = 1.0f;
+    const float MAX_ASTEROID_SPEED = 1.0f;
 
-	float angle = Random::GetFloat(Maths::TWO_PI);
-	XMMATRIX randomRotation = XMMatrixRotationZ(angle);
-	XMVECTOR velocity = XMVectorSet(0.0f, Random::GetFloat(MAX_ASTEROID_SPEED), 0.0f, 0.0f);
-	velocity = XMVector3TransformNormal(velocity, randomRotation);
+    float angle = Random::GetFloat(Maths::TWO_PI);
+    XMMATRIX randomRotation = XMMatrixRotationZ(angle);
+    XMVECTOR velocity = XMVectorSet(0.0f, Random::GetFloat(MAX_ASTEROID_SPEED), 0.0f, 0.0f);
+    velocity = XMVector3TransformNormal(velocity, randomRotation);
 
-	Asteroid *asteroid = new Asteroid(position, velocity, size);
-	asteroid->EnableCollisions(collision_, size * 5.0f);
-	asteroids_.push_back(asteroid);
+    Asteroid* asteroid = new Asteroid(position, velocity, size);
+    asteroid->EnableCollisions(collision_, size * 5.0f);
+    asteroids_.push_back(asteroid);
 }
 
-bool Game::IsAsteroid(GameEntity *entity) const
+bool Game::IsAsteroid(GameEntity* entity) const
 {
-	return (std::find(asteroids_.begin(),
-		asteroids_.end(), entity) != asteroids_.end()); 
+    return (std::find(asteroids_.begin(),
+        asteroids_.end(), entity) != asteroids_.end());
 }
 
-void Game::AsteroidHit(Asteroid *asteroid)
+bool Game::IsBullet(GameEntity* entity) const
 {
-	int oldSize = asteroid->GetSize();
-	if (oldSize > 1)
-	{
-		int smallerSize = oldSize -1;
-		XMVECTOR position = asteroid->GetPosition();
-		SpawnAsteroidAt(position, smallerSize);
-		SpawnAsteroidAt(position, smallerSize);
-	}
-	DeleteAsteroid(asteroid);
+    return (std::find(bulletPool_.begin(),
+        bulletPool_.end(), entity) != bulletPool_.end());
 }
 
-void Game::DeleteAsteroid(Asteroid *asteroid)
+void Game::AsteroidHit(Asteroid* asteroid)
 {
-	asteroids_.remove(asteroid);
-	delete asteroid;
+    int oldSize = asteroid->GetSize();
+    if (oldSize > 1)
+    {
+        int smallerSize = oldSize - 1;
+        XMVECTOR position = asteroid->GetPosition();
+        SpawnAsteroidAt(position, smallerSize);
+        SpawnAsteroidAt(position, smallerSize);
+    }
+    DeleteAsteroid(asteroid);
+}
+
+void Game::DeleteAsteroid(Asteroid* asteroid)
+{
+    asteroids_.remove(asteroid);
+    delete asteroid;
 }
 
 void Game::UpdateCollisions()
 {
-	collision_->DoCollisions(this);
+    collision_->DoCollisions(this);
 }
